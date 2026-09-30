@@ -1,0 +1,390 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Калькулятор платного веса</title>
+
+    <style>
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            font-family: Arial, sans-serif;
+            background: #f3f6fa;
+            color: #1f2937;
+        }
+
+        .container {
+            max-width: 650px;
+            margin: 50px auto;
+            padding: 20px;
+        }
+
+        .calculator {
+            background: #ffffff;
+            border-radius: 18px;
+            padding: 30px;
+            box-shadow: 0 10px 35px rgba(0, 0, 0, 0.08);
+        }
+
+        h1 {
+            margin: 0 0 10px;
+            text-align: center;
+            font-size: 28px;
+            color: #111827;
+        }
+
+        .subtitle {
+            text-align: center;
+            color: #6b7280;
+            margin-bottom: 30px;
+        }
+
+        .form-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 18px;
+        }
+
+        .field {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .field.full {
+            grid-column: 1 / -1;
+        }
+
+        label {
+            margin-bottom: 7px;
+            font-weight: 600;
+            font-size: 14px;
+        }
+
+        input {
+            width: 100%;
+            padding: 13px 14px;
+            border: 1px solid #d1d5db;
+            border-radius: 10px;
+            font-size: 16px;
+            outline: none;
+            transition: 0.2s;
+        }
+
+        input:focus {
+            border-color: #2563eb;
+            box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+        }
+
+        button {
+            width: 100%;
+            margin-top: 25px;
+            padding: 15px;
+            border: none;
+            border-radius: 10px;
+            background: #2563eb;
+            color: white;
+            font-size: 17px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: 0.2s;
+        }
+
+        button:hover {
+            background: #1d4ed8;
+        }
+
+        .result {
+            display: none;
+            margin-top: 25px;
+            padding: 22px;
+            border-radius: 14px;
+            background: #eff6ff;
+            border: 1px solid #bfdbfe;
+        }
+
+        .result-row {
+            display: flex;
+            justify-content: space-between;
+            gap: 20px;
+            padding: 10px 0;
+            border-bottom: 1px solid #dbeafe;
+        }
+
+        .result-row:last-child {
+            border-bottom: none;
+        }
+
+        .result-row span:first-child {
+            color: #4b5563;
+        }
+
+        .result-row strong {
+            color: #111827;
+        }
+
+        .final-result {
+            margin-top: 15px;
+            padding: 18px;
+            border-radius: 12px;
+            background: #2563eb;
+            color: white;
+            text-align: center;
+        }
+
+        .final-result small {
+            display: block;
+            font-size: 14px;
+            margin-bottom: 5px;
+            opacity: 0.9;
+        }
+
+        .final-result strong {
+            font-size: 32px;
+        }
+
+        .error {
+            display: none;
+            margin-top: 15px;
+            padding: 12px;
+            border-radius: 10px;
+            background: #fef2f2;
+            color: #b91c1c;
+            border: 1px solid #fecaca;
+        }
+
+        .formula {
+            margin-top: 25px;
+            padding: 15px;
+            background: #f9fafb;
+            border-radius: 10px;
+            font-size: 13px;
+            color: #6b7280;
+            line-height: 1.6;
+        }
+
+        @media (max-width: 550px) {
+            .container {
+                margin: 20px auto;
+                padding: 12px;
+            }
+
+            .calculator {
+                padding: 20px;
+            }
+
+            .form-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .field.full {
+                grid-column: auto;
+            }
+
+            h1 {
+                font-size: 24px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+<div class="container">
+    <div class="calculator">
+
+        <h1>Калькулятор платного веса</h1>
+        <div class="subtitle">
+            Расчёт объёмного и платного веса
+        </div>
+
+        <div class="form-grid">
+
+            <div class="field">
+                <label for="length">Длина (см)</label>
+                <input type="number" id="length" min="0" step="0.01" placeholder="Например: 60">
+            </div>
+
+            <div class="field">
+                <label for="width">Ширина (см)</label>
+                <input type="number" id="width" min="0" step="0.01" placeholder="Например: 40">
+            </div>
+
+            <div class="field">
+                <label for="height">Высота (см)</label>
+                <input type="number" id="height" min="0" step="0.01" placeholder="Например: 50">
+            </div>
+
+            <div class="field">
+                <label for="quantity">Количество мест</label>
+                <input type="number" id="quantity" min="1" step="1" value="1">
+            </div>
+
+            <div class="field full">
+                <label for="actualWeight">Фактический вес (кг)</label>
+                <input type="number" id="actualWeight" min="0" step="0.01" placeholder="Например: 15.2">
+            </div>
+
+        </div>
+
+        <button onclick="calculate()">
+            Рассчитать
+        </button>
+
+        <div class="error" id="error"></div>
+
+        <div class="result" id="result">
+
+            <div class="result-row">
+                <span>Объёмный вес:</span>
+                <strong id="volumeWeight">0 кг</strong>
+            </div>
+
+            <div class="result-row">
+                <span>Фактический вес:</span>
+                <strong id="actualResult">0 кг</strong>
+            </div>
+
+            <div class="result-row">
+                <span>Вес до округления:</span>
+                <strong id="chargeableBefore">0 кг</strong>
+            </div>
+
+            <div class="final-result">
+                <small>Платный вес</small>
+                <strong id="chargeableWeight">0 кг</strong>
+            </div>
+
+        </div>
+
+        <div class="formula">
+            <strong>Формула объёмного веса:</strong><br>
+            (Длина × Ширина × Высота / 6000) × Количество мест
+            <br><br>
+
+            <strong>Правило:</strong><br>
+            Платный вес = максимум между фактическим и объёмным весом.
+            <br>
+            0,01–0,49 → +0,50 кг<br>
+            0,51–0,99 → +1,00 кг<br>
+            0,00 и 0,50 → без изменений
+        </div>
+
+    </div>
+</div>
+
+
+<script>
+    function roundChargeableWeight(weight) {
+        // Определяем целую часть
+        const integerPart = Math.floor(weight);
+
+        // Дробная часть
+        const decimalPart = weight - integerPart;
+
+        // Убираем возможные ошибки вычислений JavaScript
+        const decimal = Math.round(decimalPart * 100) / 100;
+
+        // Точное значение .00
+        if (decimal === 0) {
+            return integerPart;
+        }
+
+        // Точное значение .50
+        if (decimal === 0.5) {
+            return integerPart + 0.5;
+        }
+
+        // От .01 до .49 → .50
+        if (decimal >= 0.01 && decimal <= 0.49) {
+            return integerPart + 0.5;
+        }
+
+        // От .51 до .99 → следующий целый кг
+        if (decimal >= 0.51 && decimal <= 0.99) {
+            return integerPart + 1;
+        }
+
+        return weight;
+    }
+
+
+    function formatWeight(weight) {
+        return weight.toFixed(2).replace(".", ",") + " кг";
+    }
+
+
+    function calculate() {
+
+        const length = parseFloat(document.getElementById("length").value);
+        const width = parseFloat(document.getElementById("width").value);
+        const height = parseFloat(document.getElementById("height").value);
+        const quantity = parseInt(document.getElementById("quantity").value);
+        const actualWeight = parseFloat(document.getElementById("actualWeight").value);
+
+        const error = document.getElementById("error");
+        const result = document.getElementById("result");
+
+        // Проверка данных
+        if (
+            isNaN(length) ||
+            isNaN(width) ||
+            isNaN(height) ||
+            isNaN(quantity) ||
+            isNaN(actualWeight) ||
+            length <= 0 ||
+            width <= 0 ||
+            height <= 0 ||
+            quantity <= 0 ||
+            actualWeight < 0
+        ) {
+            error.textContent = "Пожалуйста, заполните все поля корректно.";
+            error.style.display = "block";
+            result.style.display = "none";
+            return;
+        }
+
+        error.style.display = "none";
+
+        // 1. Объёмный вес
+        const volumeWeight =
+            (length * width * height / 6000) * quantity;
+
+        // 2. Платный вес до округления
+        const chargeableBefore =
+            Math.max(actualWeight, volumeWeight);
+
+        // 3. Округление платного веса
+        const chargeableWeight =
+            roundChargeableWeight(chargeableBefore);
+
+        // Вывод
+        document.getElementById("volumeWeight").textContent =
+            formatWeight(volumeWeight);
+
+        document.getElementById("actualResult").textContent =
+            formatWeight(actualWeight);
+
+        document.getElementById("chargeableBefore").textContent =
+            formatWeight(chargeableBefore);
+
+        document.getElementById("chargeableWeight").textContent =
+            formatWeight(chargeableWeight);
+
+        result.style.display = "block";
+    }
+
+
+    // Расчёт по клавише Enter
+    document.addEventListener("keydown", function(event) {
+        if (event.key === "Enter") {
+            calculate();
+        }
+    });
+</script>
+
+</body>
+</html>
